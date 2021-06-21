@@ -16,13 +16,17 @@
         "service_worker": "background.js"
     },
     "permissions": [
-        "webNavigation", "scripting", "storage"
+        "webNavigation", "scripting", "storage",
+        "http://192.168.3.7/*"
+
     ],
     "host_permissions": [
-        "*://*.geoguessr.com/*"
+        "*://*.geoguessr.com/*",
+        "http://192.168.3.7/*"
     ],
     "web_accessible_resources": [{
         "resources": ["/assets/icons/*.svg", "/styles/*.css", "test.txt"],
-        "matches": ["*://*.geoguessr.com/*"]
+        "matches": ["*://*.geoguessr.com/*","*://*.192.168.3.7/*"]
+
     }]
 }

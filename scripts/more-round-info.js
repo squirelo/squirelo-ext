@@ -28,7 +28,7 @@
         if (guess.time < 60) {
             time = `${guess.time}s`;
         } else if (guess.time >= 60 && guess.time < 3600) {
-            time = `${round_seconds_date.toISOString().substr(14, 5).replace(/^0+/, '')}`; 
+            time = `${round_seconds_date.toISOString().substr(14, 5).replace(/^0+/, '')}`;
         } else {
             time = `${round_seconds_date.toISOString().substr(11, 8).replace(/^0+/, '')}`;
         }
@@ -37,7 +37,7 @@
     }
 
     const layout_elem = document.querySelector('div.game-layout__status');
-    
+
     /**
      * Style default game statuses.
      */
@@ -53,11 +53,20 @@
             const regex = /([\d,]+)/gm;
             const str = label.textContent;
             const matches = regex.exec(str);
+            console.log('sdsdfsdsfe');
             if (matches) {
                 const points = matches[0].replace(',', '');
                 chrome.storage.sync.get('score-value', res => {
                     const scoreLimite = parseInt(res['score-value'], 10);
                     console.log(scoreLimite, points, points < scoreLimite);
+
+                    if (points<scoreLimite) {
+
+                      fetch('http://192.168.3.7/servo');
+                    }
+
+
+
                 });
                 /*const url = chrome.runtime.getURL('test.txt');
                 fetch(url)
@@ -75,7 +84,7 @@
     let observer = new MutationObserver(async _mutations => {
         const response = await fetch(`${URL_BASE}/games/${game_id}`);
         const game_info = await response.json();
-        
+
         console.log('infos', game_info);
         get_score();
 
@@ -97,7 +106,7 @@
 
     const statuses_elem = document.createElement('div');
     statuses_elem.innerHTML = `
-        <div class="game-statuses" id="advanced-round-statuses" 
+        <div class="game-statuses" id="advanced-round-statuses"
             style="display: flex; border-top-left-radius: 0; border-top-right-radius: 0;"
         >
         </div>`.trim();
