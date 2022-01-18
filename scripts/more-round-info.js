@@ -46,38 +46,41 @@
         status.style = `flex: 1;`;
     });
 
-    const get_score = function () {
-        const label = document.querySelector('.score-bar__label');
-
-        if (label) {
-            const regex = /([\d,]+)/gm;
-            const str = label.textContent;
-            const matches = regex.exec(str);
-            console.log('sdsdfsdsfe');
-            if (matches) {
-                const points = matches[0].replace(',', '');
-                chrome.storage.sync.get('score-value', res => {
-                    const scoreLimite = parseInt(res['score-value'], 10);
-                    console.log(scoreLimite, points, points < scoreLimite);
-
-                    if (points<scoreLimite) {
-
-                      fetch('http://192.168.3.7/servo');
-                    }
-
-
-
-                });
-                /*const url = chrome.runtime.getURL('test.txt');
-                fetch(url)
-                    .then((response) => response.text()) //assuming file contains json
-                    .then((text) => {
-                        console.log(text, points, points < text);
-                    });*/
-            }
+    const get_score = async function () {
+        const scoreVisible = document.querySelector("[class^='result-layout_root']");
+        console.log(scoreVisible); 
+        if (scoreVisible) {
+          const URL_BASE = `https://www.geoguessr.com/api/v3`;
+          const game_id = window.location.href.split('/').pop();
+    
+          let responseBis = await fetch(`${URL_BASE}/games/${game_id}`);
+          const infos = await responseBis.json();
+            console.log('bla');
+          if (infos.player.guesses) {
+            console.log('blabla');
+            const points = infos.player.guesses[infos.player.guesses.length - 1].roundScore;
+            const url = chrome.runtime.getURL('test.txt');
+            // version fichier texte
+            fetch(url)
+              .then((response) => response.text()) //assuming file contains json
+              .then((scoreToReach) => {
+                console.log(scoreToReach, parseInt(points.amount, 10));
+                if (parseInt(points.amount, 10) < scoreToReach) {
+                  console.log("fire");
+                }
+              });
+            
+            // Version config extension
+            chrome.storage.sync.get('score-value', res => {
+              const scoreToReach = parseInt(res['score-value'], 10);
+              console.log(scoreToReach, parseInt(points.amount, 10));
+              if (parseInt(points.amount, 10) < scoreToReach) {
+                console.log("fire");
+              }
+            });
+          }
         }
-    };
-
+      };
     /**
      * Listen for game score change and request the game state.
      */
@@ -98,47 +101,46 @@
         round_elem.children[1].firstElementChild.innerHTML = guess.score;
         round_elem.children[2].innerHTML = `${guess.distance} | ${guess.time}`
     });
-
-    observer.observe(document.querySelector('div.game-statuses > div:last-child'), {
+    observer.observe(document.querySelector("[class^='version3-in-game_layout']"), {
         subtree: true,
         characterData: true,
     });
 
-    const statuses_elem = document.createElement('div');
-    statuses_elem.innerHTML = `
-        <div class="game-statuses" id="advanced-round-statuses"
-            style="display: flex; border-top-left-radius: 0; border-top-right-radius: 0;"
-        >
-        </div>`.trim();
+    // //const statuses_elem = document.createElement('div');
+    // statuses_elem.innerHTML = `
+    //     <div class="game-statuses" id="advanced-round-statuses"
+    //         style="display: flex; border-top-left-radius: 0; border-top-right-radius: 0;"
+    //     >
+    //     </div>`.trim();
 
-    for (let i = 1; i <= 4; i++) {
-        const round_info = document.createElement('div');
+    // for (let i = 1; i <= 4; i++) {
+    //     const round_info = document.createElement('div');
 
-        const guess_dict = game_info.player.guesses[i-1];
-        const guess = guess_dict ? parse_round_info(guess_dict) : undefined;
+    //     const guess_dict = game_info.player.guesses[i-1];
+    //     const guess = guess_dict ? parse_round_info(guess_dict) : undefined;
 
-        const coords = guess ? { lat: game_info.rounds[i-1].lat, lng: game_info.rounds[i-1].lng } : undefined;
+    //     const coords = guess ? { lat: game_info.rounds[i-1].lat, lng: game_info.rounds[i-1].lng } : undefined;
 
-        round_info.innerHTML = `
-            <div class="game-status" id="round${i}-details" data-qa="score"
-                style="flex: 1; white-space: nowrap;">
-                <div class="game-status__heading">
-                    Round ${i}
-                </div>
-                <a target="_blank" href="${guess ?
-                    `https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}` : '' }"
-                    style="text-decoration: none;">
-                    <div class="game-status__body score-label">
-                        ${guess ? guess.score : '-'}
-                    </div>
-                </a>
-                <div class="extra-label" style="font-size: 8px;">
-                    ${guess ? `${guess.distance} | ${guess.time}` : 'TBD'}
-                </div>
-            </div>
-        `.trim();
+    //     round_info.innerHTML = `
+    //         <div class="game-status" id="round${i}-details" data-qa="score"
+    //             style="flex: 1; white-space: nowrap;">
+    //             <div class="game-status__heading">
+    //                 Round ${i}
+    //             </div>
+    //             <a target="_blank" href="${guess ?
+    //                 `https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}` : '' }"
+    //                 style="text-decoration: none;">
+    //                 <div class="game-status__body score-label">
+    //                     ${guess ? guess.score : '-'}
+    //                 </div>
+    //             </a>
+    //             <div class="extra-label" style="font-size: 8px;">
+    //                 ${guess ? `${guess.distance} | ${guess.time}` : 'TBD'}
+    //             </div>
+    //         </div>
+    //     `.trim();
 
-        statuses_elem.firstChild.appendChild(round_info.firstChild);
-    }
-    layout_elem.appendChild(statuses_elem.firstChild);
+    //     statuses_elem.firstChild.appendChild(round_info.firstChild);
+    // }
+    // layout_elem.appendChild(statuses_elem.firstChild);
 })();

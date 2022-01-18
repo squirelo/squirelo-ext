@@ -16,13 +16,13 @@
         "service_worker": "background.js"
     },
     "permissions": [
-        "webNavigation", "scripting", "storage",
-        "http://192.168.3.7/*"
+        "webNavigation", "scripting", "storage"
 
     ],
     "host_permissions": [
         "*://*.geoguessr.com/*",
-        "http://192.168.3.7/*"
+        "*://*.192.168.3.7/*",
+        "*://*.ngrok.io/*"
     ],
     "web_accessible_resources": [{
         "resources": ["/assets/icons/*.svg", "/styles/*.css", "test.txt"],
